@@ -1,0 +1,61 @@
+
+bool BoundsBehavior::intersectLineSegments(ofVec2f p1, ofVec2f p2, ofVec2f p3, ofVec2f p4, ofVec2f* crossPoint = NULL)
+{
+	float ua, ub;
+	
+	// Using algorithm from http://paulbourke.net/geometry/lineline2d/
+	ua = ((p4.x-p3.x)*(p1.y-p3.y) - (p4.y-p3.y)*(p1.x-p3.x)) /
+		((p4.y-p3.y)*(p2.x-p1.x) - (p4.x-p3.x)*(p2.y-p1.y));
+	
+	ub = ((p2.x-p1.x)*(p1.y-p3.y) - (p2.y-p1.y)*(p1.x-p3.x)) /
+		((p4.y-p3.y)*(p2.x-p1.x) - (p4.x-p3.x)*(p2.y-p1.y));
+	
+	if (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f)
+	{
+		// this means the point is within both line segments, so compute the point
+		if (crossPoint != NULL)
+		{
+			crossPoint->x = p1.x + ua*(p2.x-p1.x);
+			crossPoint->y = p1.y + ua*(p2.y-p1.y);
+		}
+		return true;
+	}
+	else
+		return false;
+}
+
+/*
+ Calculate the intersection of a ray and a sphere
+ The line segment is defined from p1 to p2
+ The sphere is of radius r and centered at sc
+ There are potentially two points of intersection given by
+ p = p1 + mu1 (p2 - p1)
+ p = p1 + mu2 (p2 - p1)
+ Return FALSE if the ray doesn't intersect the sphere.
+ */
+bool BoundsBehavior::intersectLineAndSphere(ofVec2f p1,ofVec2f p2,ofVec2f sc, float r, float* mu1, float* mu2)
+{
+	double a,b,c;
+	double bb4ac;
+	ofVec2f dp;
+	
+	dp.x = p2.x - p1.x;
+	dp.y = p2.y - p1.y;
+	a = dp.x * dp.x + dp.y * dp.y;
+	b = 2 * (dp.x * (p1.x - sc.x) + dp.y * (p1.y - sc.y));
+	c = sc.x * sc.x + sc.y * sc.y ;
+	c += p1.x * p1.x + p1.y * p1.y;
+	c -= 2 * (sc.x * p1.x + sc.y * p1.y);
+	c -= r * r;
+	bb4ac = b * b - 4 * a * c;
+	if (abs(a) < FLT_EPSILON || bb4ac < 0) {
+		*mu1 = 0;
+		*mu2 = 0;
+		return false;
+	}
+	
+	*mu1 = (-b + sqrt(bb4ac)) / (2 * a);
+	*mu2 = (-b - sqrt(bb4ac)) / (2 * a);
+	
+	return true;
+}

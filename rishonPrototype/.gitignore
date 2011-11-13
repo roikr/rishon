@@ -1,0 +1,6 @@
+build/
+.sln
+.vcproj
+.vcproj.user
+Project.xcconfig
+rishonPrototype.xcodeproj/
